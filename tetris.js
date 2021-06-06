@@ -3,6 +3,11 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
+function eachDo(array, callback, startIndex = 0, fromFirst = true) {
+    for(let i = startIndex; i < array.length; fromFirst ? i++ : ++i) {
+        callback(i);
+    }
+}
 
 function createPiece(type)
 {
@@ -52,12 +57,14 @@ function createPiece(type)
 }
 
 function isRowFilled(rowArray) {
-    for (let x = 0; x < rowArray.length; ++x) {
+    let result = true;
+    eachDo(rowArray, function(x) {
         if (rowArray[x] === 0) {
-            return false;
+            result = false
         }
-    }
-    return true;
+    }, 0, false);
+
+    return result;
 }
 
 function getFilledRowsNumbers(array) {
@@ -71,13 +78,13 @@ function getFilledRowsNumbers(array) {
 }
 function deleteRowsNumbers(rowNumsArray) {
     let rowCount = 1;
-    for(var i = 0; i < rowNumsArray.length; i += 1) {
+    eachDo(rowNumsArray, function(i) {
         const row = arena.splice(rowNumsArray[i], 1)[0].fill(0);
         arena.unshift(row);
 
         player.score += rowCount * 10;
         rowCount += 2;
-    }
+    });
 } 
 
 function arenaSweep() {
@@ -88,16 +95,17 @@ function arenaSweep() {
 function collide(arena, player) {
     const matrix = player.matrix;
     const playerPos = player.pos;
-    for (let y = 0; y < matrix.length; ++y) {
-        for (let x = 0; x < matrix[y].length; ++x) {
+    let result = false;
+    eachDo(matrix, function(y) {
+        eachDo(matrix[y], function(x) {
             if (matrix[y][x] !== 0 &&
-               (arena[y + playerPos.y] &&
-                arena[y + playerPos.y][x + playerPos.x]) !== 0) {
-                return true;
-            }
-        }
-    }
-    return false;
+                (arena[y + playerPos.y] &&
+                 arena[y + playerPos.y][x + playerPos.x]) !== 0) {
+                 result = true;
+             }
+        }, 0, false);
+    }, 0, false);
+    return result;
 }
 
 function createMatrix(w, h) {
@@ -109,8 +117,8 @@ function createMatrix(w, h) {
 }
 
 function drawMatrix(matrix, offset) {
-    for (var row = 0 ; row < matrix.length; row += 1) {
-        for( var col = 0; col < matrix[row].length; col += 1 ) {
+    eachDo(matrix, function(row) {
+        eachDo(matrix[row], function(col) {
             var value = matrix[row][col];
             if (value !== 0) {
                 context.fillStyle = colors[value];
@@ -118,8 +126,8 @@ function drawMatrix(matrix, offset) {
                                  row + offset.y,
                                  1, 1);
             }
-        }
-    }
+        });
+    });
 }
 
 function fillCanvas(color) {
@@ -135,19 +143,19 @@ function draw() {
 }
 
 function merge(arena, player) {
-    for (var y = 0; y < player.matrix.length; y += 1) {
-        for (var x = 0; x < player.matrix[y].length; x += 1) {
+    eachDo(player.matrix, function(y) {
+        eachDo(player.matrix[y], function(x) {
             var value = player.matrix[y][x];
             if (value !== 0) {
                 arena[y + player.pos.y][x + player.pos.x] = value;
             }
-        }
-    }
+        });
+    });
 }
 
 function rotate(matrix, dir) {
-    for (let y = 0; y < matrix.length; ++y) {
-        for (let x = 0; x < y; ++x) {
+    eachDo(matrix, function(y) {
+        eachDo(y, function(x) {
             [
                 matrix[x][y],
                 matrix[y][x],
@@ -155,13 +163,13 @@ function rotate(matrix, dir) {
                 matrix[y][x],
                 matrix[x][y],
             ];
-        }
-    }
+        }, 0, false);
+    }, 0, false);
 
     if (dir > 0) {
-        for (var i = 0; i < matrix.length; i += 1) {
-            matrix[i].reverse();
-        }
+        eachDo(matrix, function (i) {
+            matrix[i].reverse()
+        });
     } else {
         matrix.reverse();
     }
@@ -200,9 +208,9 @@ function playerReset() {
 }
 
 function fillArrayWith(array, a) {
-    for (var i = 0; i < array.length; i += 1) {
+    eachDo(array, function(i) {
         array[i].fill(a);
-    }
+    });
 } 
 
 function playerRotate(dir) {
