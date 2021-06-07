@@ -15,7 +15,12 @@ function IF(condition, callback1, callback2 = function () {}) {
     } else {
         callback2();
     }
+}
 
+function ifCollide (callback) {
+    IF(collide(arena, player), function () {
+        callback();
+    })
 }
 
 function createPiece(type)
@@ -117,9 +122,9 @@ function collide(arena, player) {
 
 function createMatrix(w, h) {
     const matrix = [];
-    for (var i = h; h > 0; h -= 1) {
+    eachDo(h, function () {
         matrix.push(new Array(w).fill(0));
-    }
+    })
     return matrix;
 }
 
@@ -182,7 +187,7 @@ function rotate(matrix, dir) {
 
 function playerDrop() {
     player.pos.y++;
-    IF(collide(arena, player), function () {
+    ifCollide(function () {
         player.pos.y--;
         merge(arena, player);
         playerReset();
@@ -194,7 +199,7 @@ function playerDrop() {
 
 function playerMove(offset) {
     player.pos.x += offset;
-    IF(collide(arena, player), function() {
+    ifCollide(function () {
         player.pos.x -= offset;
     });
 }
@@ -205,7 +210,7 @@ function playerReset() {
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) -
                    (player.matrix[0].length / 2 | 0);
-    IF(collide(arena, player), function () {
+    ifCollide(function() {
         arena = createMatrix(12, 20);
         player.score = 0;
         updateScore();
