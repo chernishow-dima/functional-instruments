@@ -3,10 +3,19 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
-function eachDo(array, callback, startIndex = 0, fromFirst = true) {
-    for(let i = startIndex; i < array.length; fromFirst ? i++ : ++i) {
+function eachDo(iteration, callback, startIndex = 0, fromFirst = true) {
+    for(let i = startIndex; i < (Array.isArray(iteration) ? iteration.length : iteration); fromFirst ? i++ : ++i) {
         callback(i);
     }
+}
+
+function IF(condition, callback1, callback2 = function () {}) {
+    if (condition) {
+        callback1();
+    } else {
+        callback2();
+    }
+
 }
 
 function createPiece(type)
@@ -59,9 +68,9 @@ function createPiece(type)
 function isRowFilled(rowArray) {
     let result = true;
     eachDo(rowArray, function(x) {
-        if (rowArray[x] === 0) {
+        IF(rowArray[x] === 0, function () {
             result = false
-        }
+        });
     }, 0, false);
 
     return result;
@@ -69,12 +78,12 @@ function isRowFilled(rowArray) {
 
 function getFilledRowsNumbers(array) {
     let result = [];
-    for (let y = array.length -1; y > 0; --y) {
-        if (isRowFilled(array[y])) {
+    eachDo(array, function(y) {
+        IF(isRowFilled(array[y]), function () {
             result.push(y);
-        }
-    }
-    return result;
+        });
+    });
+    return result.reverse();
 }
 function deleteRowsNumbers(rowNumsArray) {
     let rowCount = 1;
@@ -98,11 +107,9 @@ function collide(arena, player) {
     let result = false;
     eachDo(matrix, function(y) {
         eachDo(matrix[y], function(x) {
-            if (matrix[y][x] !== 0 &&
-                (arena[y + playerPos.y] &&
-                 arena[y + playerPos.y][x + playerPos.x]) !== 0) {
-                 result = true;
-             }
+            IF(matrix[y][x] !== 0 && (arena[y + playerPos.y] && arena[y + playerPos.y][x + playerPos.x]) !== 0, function () {
+                result = true;
+            });
         }, 0, false);
     }, 0, false);
     return result;
@@ -120,12 +127,10 @@ function drawMatrix(matrix, offset) {
     eachDo(matrix, function(row) {
         eachDo(matrix[row], function(col) {
             var value = matrix[row][col];
-            if (value !== 0) {
+            IF(value !== 0, function () {
                 context.fillStyle = colors[value];
-                context.fillRect(col + offset.x,
-                                 row + offset.y,
-                                 1, 1);
-            }
+                context.fillRect(col + offset.x, row + offset.y, 1, 1);
+            });
         });
     });
 }
@@ -146,9 +151,9 @@ function merge(arena, player) {
     eachDo(player.matrix, function(y) {
         eachDo(player.matrix[y], function(x) {
             var value = player.matrix[y][x];
-            if (value !== 0) {
+            IF (value !== 0, function () {
                 arena[y + player.pos.y][x + player.pos.x] = value;
-            }
+            });
         });
     });
 }
@@ -166,32 +171,32 @@ function rotate(matrix, dir) {
         }, 0, false);
     }, 0, false);
 
-    if (dir > 0) {
+    IF(dir > 0, function () {
         eachDo(matrix, function (i) {
             matrix[i].reverse()
         });
-    } else {
+    }, function () {
         matrix.reverse();
-    }
+    });
 }
 
 function playerDrop() {
     player.pos.y++;
-    if (collide(arena, player)) {
+    IF(collide(arena, player), function () {
         player.pos.y--;
         merge(arena, player);
         playerReset();
         arenaSweep();
         updateScore();
-    }
+    });
     dropCounter = 0;
 }
 
 function playerMove(offset) {
     player.pos.x += offset;
-    if (collide(arena, player)) {
+    IF(collide(arena, player), function() {
         player.pos.x -= offset;
-    }
+    });
 }
 
 function playerReset() {
@@ -200,11 +205,11 @@ function playerReset() {
     player.pos.y = 0;
     player.pos.x = (arena[0].length / 2 | 0) -
                    (player.matrix[0].length / 2 | 0);
-    if (collide(arena, player)) {
+    IF(collide(arena, player), function () {
         arena = createMatrix(12, 20);
         player.score = 0;
         updateScore();
-    }
+    });
 }
 
 function fillArrayWith(array, a) {
@@ -220,11 +225,10 @@ function playerRotate(dir) {
     while (collide(arena, player)) {
         player.pos.x += offset;
         offset = -(offset + (offset > 0 ? 1 : -1));
-        if (offset > player.matrix[0].length) {
+        IF(offset > player.matrix[0].length, function () {
             rotate(player.matrix, -dir);
             player.pos.x = pos;
-            return;
-        }
+        });
     }
 }
 
@@ -236,9 +240,9 @@ function update(time = 0) {
     const deltaTime = time - lastTime;
 
     dropCounter += deltaTime;
-    if (dropCounter > dropInterval) {
+    IF(dropCounter > dropInterval, function () {
         playerDrop();
-    }
+    });
 
     lastTime = time;
 
@@ -251,17 +255,25 @@ function updateScore() {
 }
 
 document.addEventListener('keydown', event => {
-    if (event.keyCode === 37) { // стрелка влево
+    IF(event.keyCode === 37, function () {
         playerMove(-1);
-    } else if (event.keyCode === 39) { // стрелка вправо
-        playerMove(1);
-    } else if (event.keyCode === 40) { // стрелка вниз
-        playerDrop();
-    } else if (event.keyCode === 81) { // W
-        playerRotate(-1);
-    } else if (event.keyCode === 87) { // Q
-        playerRotate(1);
-    }
+    }, function () {
+        IF(event.keyCode === 39, function () {
+            playerMove(1);
+        }, function () {
+            IF(event.keyCode === 40, function () {
+                playerDrop();
+            }, function () {
+                IF(event.keyCode === 81, function () {
+                    playerRotate(-1);
+                }, function () {
+                    IF(event.keyCode === 87, function () {
+                        playerRotate(1);
+                    });
+                });
+            });
+        });
+    });
 });
 
 const colors = [
