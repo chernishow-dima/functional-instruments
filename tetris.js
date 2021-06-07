@@ -3,6 +3,14 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
+function forEachArrayElement (array, callback, startIndex = 0, fromFirst = true) {
+    eachDo(array, function (i) {
+        eachDo(array[i], function (j) {
+            callback(i, j);
+        }, startIndex, fromFirst);
+    }, startIndex, fromFirst);
+}
+
 function eachDo(iteration, callback, startIndex = 0, fromFirst = true) {
     for(let i = startIndex; i < (Array.isArray(iteration) ? iteration.length : iteration); fromFirst ? i++ : ++i) {
         callback(i);
@@ -110,12 +118,10 @@ function collide(arena, player) {
     const matrix = player.matrix;
     const playerPos = player.pos;
     let result = false;
-    eachDo(matrix, function(y) {
-        eachDo(matrix[y], function(x) {
-            IF(matrix[y][x] !== 0 && (arena[y + playerPos.y] && arena[y + playerPos.y][x + playerPos.x]) !== 0, function () {
-                result = true;
-            });
-        }, 0, false);
+    forEachArrayElement(matrix, function (y, x) {
+        IF(matrix[y][x] !== 0 && (arena[y + playerPos.y] && arena[y + playerPos.y][x + playerPos.x]) !== 0, function () {
+            result = true;
+        });
     }, 0, false);
     return result;
 }
@@ -129,13 +135,11 @@ function createMatrix(w, h) {
 }
 
 function drawMatrix(matrix, offset) {
-    eachDo(matrix, function(row) {
-        eachDo(matrix[row], function(col) {
-            var value = matrix[row][col];
-            IF(value !== 0, function () {
-                context.fillStyle = colors[value];
-                context.fillRect(col + offset.x, row + offset.y, 1, 1);
-            });
+    forEachArrayElement(matrix, function (row, col) {
+        var value = matrix[row][col];
+        IF(value !== 0, function () {
+            context.fillStyle = colors[value];
+            context.fillRect(col + offset.x, row + offset.y, 1, 1);
         });
     });
 }
@@ -153,12 +157,10 @@ function draw() {
 }
 
 function merge(arena, player) {
-    eachDo(player.matrix, function(y) {
-        eachDo(player.matrix[y], function(x) {
-            var value = player.matrix[y][x];
-            IF (value !== 0, function () {
-                arena[y + player.pos.y][x + player.pos.x] = value;
-            });
+    forEachArrayElement(player.matrix, function(y, x) {
+        var value = player.matrix[y][x];
+        IF (value !== 0, function () {
+            arena[y + player.pos.y][x + player.pos.x] = value;
         });
     });
 }
@@ -214,12 +216,6 @@ function playerReset() {
         arena = createMatrix(12, 20);
         player.score = 0;
         updateScore();
-    });
-}
-
-function fillArrayWith(array, a) {
-    eachDo(array, function(i) {
-        array[i].fill(a);
     });
 } 
 
