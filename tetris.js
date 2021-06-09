@@ -137,13 +137,9 @@ function drawMatrix(matrix, offset) {
     });
 }
 
-function fillCanvas(color) {
-    context.fillStyle = color;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-}
-
 function draw() {
-    fillCanvas('#000');
+    context.fillStyle = '#000';
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
     drawMatrix(arena, {x: 0, y: 0});
     drawMatrix(player.matrix, player.pos);
