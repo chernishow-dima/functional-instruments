@@ -79,14 +79,7 @@ function createPiece(type)
 }
 
 function isRowFilled(rowArray) {
-    let result = true;
-    eachDo(rowArray, function(x) {
-        IF(rowArray[x] === 0, function () {
-            result = false
-        });
-    }, 0, false);
-
-    return result;
+    return rowArray.slice(1, rowArray.length).every((el) => el !==  0)
 }
 
 function getFilledRowsNumbers(array) {
