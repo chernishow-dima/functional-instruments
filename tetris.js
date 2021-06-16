@@ -124,7 +124,7 @@ const allAvailablePieces = [
 
 // вычисление
 function createPiece() {
-    return _.shuffle(getAllAvailablePieces())[0]
+    return _.shuffle(allAvailablePieces)[0]
 }
 
 // вычисление
