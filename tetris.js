@@ -297,5 +297,4 @@ function startGame() {
     arena = createMatrix(12, 20);
     player = playerReset(arena, player);
     updateScore(0);
-    update();
 }
