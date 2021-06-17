@@ -56,8 +56,8 @@ function updateScoreDom(value) {
     document.getElementById('score').innerText = value;
 }
 
-// действие
-function updatePlayerPosition({ xOffset = 0, yOffset = 0 } = { xOffset: 0, yOffset: 0 }) {
+// вычисление
+function updatePlayerPosition(player, { xOffset = 0, yOffset = 0 } = { xOffset: 0, yOffset: 0 }) {
     playerCopy = _.cloneDeep(player);
     playerCopy.pos.x += xOffset;
     playerCopy.pos.y += yOffset;
@@ -201,9 +201,9 @@ function rotate(matrix, dir) {
 
 // действие
 function playerDrop() {
-    player = updatePlayerPosition({ yOffset: 1 })
+    player = updatePlayerPosition(player, { yOffset: 1 })
     if (collide(arena, player)) {
-        player = updatePlayerPosition({ yOffset: -1 });
+        player = updatePlayerPosition(player, { yOffset: -1 });
         arena = merge(arena, player);
         player = playerReset(arena, player);
         if (collide(arena, player)) {
@@ -217,9 +217,9 @@ function playerDrop() {
 
 // действие
 function playerMove(offset) {
-    player = updatePlayerPosition({ xOffset: offset })
+    player = updatePlayerPosition(player, { xOffset: offset })
     if (collide(arena, player)) {
-        player = updatePlayerPosition({ xOffset: -offset })
+        player = updatePlayerPosition(player, { xOffset: -offset })
     }
 }
 
@@ -245,7 +245,7 @@ function playerRotate(dir) {
     let offset = 1;
     player.matrix = rotate(player.matrix, dir);
     while (collide(arena, player)) {
-        player = updatePlayerPosition({ xOffset: offset });
+        player = updatePlayerPosition(player, { xOffset: offset });
         if (offset > player.matrix[0].length) {
             player.matrix = rotate(player.matrix, -dir);
             player.pos.x = pos;
